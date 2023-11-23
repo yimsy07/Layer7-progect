@@ -1,4 +1,4 @@
-#블록체인
+#블록체인1
 import hashlib
 
 class Block:
@@ -48,8 +48,84 @@ block_chain_printer(block_chain)
 
 
 
+#블록체인1에 이중지불 시나리오
+import hashlib
+
+class Block:
+    def __init__(self, data, prevhash, n):
+        self.data = data
+        self.prevhash = prevhash
+        self.n = n
+        self.nonce = 0
+        self.hash = None
+
+    def get_hash(self):
+        if self.prevhash is None:
+            self.nonce = 0
+            self.hash = hashlib.sha256(self.data.encode()).hexdigest()
+        else:
+            pad = '0' * self.n
+            while True:
+                hash_attempt = self.prevhash + str(self.data) + str(self.nonce)
+                hash_attempt = hashlib.sha256(hash_attempt.encode()).hexdigest()
+                if hash_attempt.startswith(pad):
+                    self.hash = hash_attempt
+                    break
+                self.nonce += 1
+
+def block_chain_printer(block_chain):
+    for block in block_chain:
+        print(f'nonce: {block.nonce}')
+        print(f'data: {block.data}')
+        print(f'prevhash: {block.prevhash}')
+        print(f'hash: {block.hash}')
+        print()
+
+def simulate_double_spending(block_chain):
+    
+    print("Simulating Double Spending Scenario...\n")
+    
+    
+    prior_block = block_chain[-1]
+    first_transaction = Block("Transfer $10 from Alice to Bob", prior_block.hash, 4)
+    first_transaction.get_hash()
+    block_chain.append(first_transaction)
+    
+    
+    prior_block = block_chain[-1]
+    double_spending_attempt = Block("Transfer $10 from Alice to Bob", prior_block.hash, 4)
+    double_spending_attempt.get_hash()
+    block_chain.append(double_spending_attempt)
 
 
+GenesisBlock = Block('Genesis Block', None, 4)
+GenesisBlock.get_hash()
+block_chain = [GenesisBlock]
+
+
+for i in range(5):
+    prior_block = block_chain[-1]
+    NextBlock = Block(f"Transfer ${i+1} from Alice to Bob", prior_block.hash, 4)
+    NextBlock.get_hash()
+    block_chain.append(NextBlock)
+
+
+print("Initial Blockchain State:")
+block_chain_printer(block_chain)
+
+
+simulate_double_spending(block_chain)
+
+
+print("\nBlockchain State After Double Spending Attempt:")
+block_chain_printer(block_chain)
+
+
+
+
+
+
+#블록체인2
 import hashlib
 import json
 from time import time
@@ -112,8 +188,8 @@ for block in blockchain.chain:
     print(block)
 
 
-
-    import hashlib
+#블록체인2에 이중지불 시나리오
+import hashlib
 import time
 
 class Block:
