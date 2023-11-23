@@ -1,11 +1,63 @@
+#블록체인
+import hashlib
+
+class Block:
+    def __init__(self, data, prevhash, n):
+        self.data = data
+        self.prevhash = prevhash
+        self.n = n 
+
+    def get_hash(self):
+        nonce = 0
+        if self.prevhash == None:
+            self.nonce = 0
+            self.hash = hashlib.sha256(self.data.encode()).hexdigest()
+            return 0
+
+        pad = '0' * self.n
+        while True:
+            hash = self.prevhash + str(self.data) + str(nonce)
+            hash = hashlib.sha256(hash.encode()).hexdigest()
+            if hash.startswith(pad):
+                self.nonce = nonce
+                self.hash = hash
+                break
+            nonce += 1
+        return 0
+
+
+def block_chain_printer(block_chain):
+    for block in block_chain:
+        print(f'nonce:{block.nonce}')
+        print(f'data:{block.data}')
+        print(f'prevhash:{block.prevhash}')
+        print(f'hash:{block.hash}')
+        print()
+
+GenesisBlock = Block('Genesis Block', None, 4)
+GenesisBlock.get_hash()
+block_chain = [GenesisBlock]
+
+for i in range(10):
+    prior_block = block_chain[-1]
+    NextBlock = Block(i+1, prior_block.hash, 4)
+    NextBlock.get_hash()
+    block_chain.append(NextBlock)
+
+block_chain_printer(block_chain)
+
+
+
+
+
 import hashlib
 import json
-from time import time  # time 모듈 임포트 수정
+from time import time
 
 class Blockchain:
     def __init__(self):
         self.chain = []
-        self.current_transactions = []  # 변수명 수정
+        self.current_transactions = []
         self.create_block(previous_hash='1', proof=100)
 
     def create_block(self, proof, previous_hash=None):
@@ -21,7 +73,7 @@ class Blockchain:
         self.chain.append(block)
         return block
 
-    def create_transaction(self, sender, recipient, amount):  # 함수명 수정
+    def create_transaction(self, sender, recipient, amount): 
         self.current_transactions.append({
             'sender': sender,
             'recipient': recipient,
@@ -29,11 +81,11 @@ class Blockchain:
         })
         return self.last_block['index'] + 1
 
-    def hash(self, block):  # self 추가
+    def hash(self, block):
         block_string = json.dumps(block, sort_keys=True).encode()
         return hashlib.sha256(block_string).hexdigest()
 
-    def last_block(self):  # self 추가
+    def last_block(self):
         return self.chain[-1]
 
     def proof_of_work(self, last_proof):
@@ -42,18 +94,17 @@ class Blockchain:
             proof += 1
         return proof
 
-    def valid_proof(self, last_proof, proof):  # 함수명 및 self 추가
+    def valid_proof(self, last_proof, proof): 
         guess = f'{last_proof}{proof}'.encode()
         guess_hash = hashlib.sha256(guess).hexdigest()
         return guess_hash[:4] == "0000"
 
-# 코드에 있는 잘못된 부분을 수정한 후에 아래 부분은 들여쓰기가 잘못되어 있습니다.
-# 아래 부분은 인스턴스를 생성하는 부분이므로 들여쓰기를 조정하였습니다.
+
 
 blockchain = Blockchain()
 blockchain.create_transaction('Layer7', 'Teamlog', 1)
 blockchain.create_transaction('Teamlog', 'Unifox', 0.5)
-proof = blockchain.proof_of_work(blockchain.last_block()['proof'])  # 함수 호출 수정
+proof = blockchain.proof_of_work(blockchain.last_block()['proof']) 
 blockchain.create_transaction('Unifox', 'Layer7', 0.2)
 block = blockchain.create_block(proof)
 
@@ -104,16 +155,16 @@ class Blockchain:
         guess_hash = hashlib.sha256(guess).hexdigest()
         return guess_hash[:4] == "0000"
 
-# 블록체인 초기화
+
 blockchain = Blockchain()
 
-# 작업 증명을 통한 블록 생성
+
 previous_block = blockchain.chain[-1]
 proof = blockchain.proof_of_work(previous_block.proof)
 block = blockchain.create_block(proof)
 blockchain.chain.append(block)
 
-# 블록체인 출력
+
 for block in blockchain.chain:
     print(f"Block #{block.index} | Hash: {block.hash} | Proof: {block.proof}")
 
@@ -173,7 +224,7 @@ class Blockchain:
         guess_hash = hashlib.sha256(guess).hexdigest()
         return guess_hash[:4] == "0000"
 
-# 사용 예시
+
 blockchain = Blockchain()
 blockchain.create_transaction('Alice', 'Bob', 1)
 blockchain.create_transaction('Bob', 'Charlie', 0.5)
@@ -182,9 +233,9 @@ blockchain.create_transaction('Charlie', 'Alice', 0.2)
 block = blockchain.create_block(proof)
 
 # 더블 스펜딩 공격 시뮬레이션
-# 같은 코인을 여러 번 사용하여 블록체인을 속인다고 가정
-blockchain.create_transaction('Alice', 'Bob', 1)  # 동일한 거래를 다시 시도
 
-# 블록체인 출력
+blockchain.create_transaction('Alice', 'Bob', 1) 
+
+
 for block in blockchain.chain:
     print(block)
